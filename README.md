@@ -10,7 +10,7 @@
 - BOBGALA HARRISON DIMA ----- FE21A151
 
 ## PROJECT NUMBER: TWO
-- Design and Implementation of a ------.
+- Design and Implementation of a Mobile Based Disaster Management System
   # Task One
   - Major types of mobile applications and their differences
   - Thorough review of programming languages used for mobile programming
