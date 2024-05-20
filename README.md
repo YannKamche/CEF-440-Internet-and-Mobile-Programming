@@ -17,9 +17,10 @@
   - How do u collect and analyse the requirements for a Mobil application (ie functional and non-functional requirements)
   - How to estimate the mobile dev cost ( after considering all analysis in the entire process)
   - Definition of mobile-dev frameworks and reviewing them considering all their different features
-  # Task Two and Three
-  - System Requirements
-  - Analysis of the Software Requirement
+  # Task Two 
+  - Requirement Gathering
+  # Task Three
+  - Requirement Analysis
    
   # Task Four
   - System Modelling and Design
