@@ -1,30 +1,26 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
+import { StatusBar } from 'react-native';
 import 'react-native-reanimated';
-
-import { useColorScheme } from '@/components/useColorScheme';
+import Colors from '@/constants/Colors';
 
 export {
   // Catch any errors thrown by the Layout component.
   ErrorBoundary,
 } from 'expo-router';
 
-export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: '(tabs)',
-};
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
-export default function RootLayout() {
+const InitialLayout = () => {
   const [loaded, error] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-    ...FontAwesome.font,
+    Poppins: require('../assets/fonts/Poppins-Regular.ttf'),
+    ...FontAwesome.font
   });
 
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
@@ -42,18 +38,23 @@ export default function RootLayout() {
     return null;
   }
 
-  return <RootLayoutNav />;
+  return (
+    <>
+      <StatusBar barStyle={"light-content"} translucent={true} />
+      <Stack>
+        <Stack.Screen name="index" options={{ headerShown: false}} />
+        <Stack.Screen name="secondpage" />
+        <Stack.Screen name="thirdpage" />
+        <Stack.Screen name="login" />
+        <Stack.Screen name="signup" />
+      </Stack>
+    </>
+  )
 }
 
-function RootLayoutNav() {
-  const colorScheme = useColorScheme();
+const RootLayoutNav = () => {
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-      </Stack>
-    </ThemeProvider>
+   <InitialLayout />
   );
 }
