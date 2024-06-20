@@ -31,7 +31,7 @@ const Page = () => {
       <Image source={logoImage} style={styles.logo} />
 
       <View style={{ paddingVertical: 10 }}>
-        <Image source={welcomeImage} style={{width: 370, height: 400}} />
+        <Image source={welcomeImage} style={{width: 370, height: 350}} />
       </View>
       <View style={{ flex: 1 }}>
         <View style={{ padding: 10 }}>

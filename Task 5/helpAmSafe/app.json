@@ -8,8 +8,8 @@
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/images/LOGO.png",
-      "resizeMode": "contain",
+      "image": "./assets/images/splash_logo.png",
+      "resizeMode": "native",
       "backgroundColor": "#D3F9F6"
     },
     "ios": {
@@ -29,7 +29,8 @@
     },
     "plugins": [
       "expo-router",
-      "expo-asset"
+      "expo-asset",
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true

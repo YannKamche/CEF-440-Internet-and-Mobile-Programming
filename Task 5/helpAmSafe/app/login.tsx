@@ -8,12 +8,22 @@ import {
   TextInput,
   Platform,
   KeyboardAvoidingView,
+  Alert,
 } from "react-native";
 import React, { useState } from "react";
 import { defaultStyles } from "@/constants/Styles";
 import { useFonts } from "expo-font";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import Colors from "@/constants/Colors";
+import { isClerkAPIResponseError, useSession, useSignIn } from "@clerk/clerk-expo";
+
+// An enum for the different sign in functionalities
+enum SignInType {
+  Phone,
+  Email,
+  Google,
+  Apple,
+}
 
 const logoImage = require("../assets/images/LOGO.png");
 const welcomeImage = require("../assets/images/picLogin.png");
@@ -36,29 +46,55 @@ const Page = () => {
 
   const keyboardVerticalOffset = Platform.OS == "ios" ? 80 : 0;
 
-  //Wrap everything in the try and catch block
-  const onSignup = async () => {
-    //pass the full phone number and make it a string
-    const fullPhoneNumber = `${countryCode}${phoneNumber}`;
-    //Navigate to the verification page
-    // router.push({
-    //   pathname: "/verify/[phone]",
-    //   params: { phone: fullPhoneNumber },
-    // });
+  const router = useRouter();
+  const { signIn } = useSignIn();
+  const { session } = useSession();
 
-    // try {
-    //   await signUp!.create({
-    //     phoneNumber: fullPhoneNumber,
-    //   });
-    //   signUp!.preparePhoneNumberVerification();
+  const onSignIn = async (type: SignInType) => {
+    if (session) {
+      Alert.alert("Error", "You are already signed in. Please sign out first.");
+      return;
+    }
 
-    //   router.push({
-    //     pathname: "/verify/[phone]",
-    //     params: { phone: fullPhoneNumber },
-    //   });
-    // } catch (error) {
-    //   console.error("Error signing up", error);
-    // }
+    if (type == SignInType.Phone) {
+      try {
+        const fullPhoneNumber = `${countryCode}${phoneNumber}`;
+
+        // Check the supported factors first
+        const { supportedFirstFactors } = await signIn!.create({
+          identifier: fullPhoneNumber,
+        });
+
+        // Check if phone number exists as supported first factor
+        const firstPhoneFactor: any = supportedFirstFactors.find(
+          (factor: any) => {
+            return factor.strategy === "phone_code";
+          }
+        );
+
+        const { phoneNumberId } = firstPhoneFactor;
+
+        await signIn!.prepareFirstFactor({
+          strategy: "phone_code",
+          phoneNumberId,
+        });
+
+        router.push({
+          pathname: "/verify/[phone]",
+          params: { phone: fullPhoneNumber, signin: "true" },
+        });
+      } catch (err) {
+        console.log("error", JSON.stringify(err, null, 2));
+        if (isClerkAPIResponseError(err)) {
+          if (err.errors[0].code === "form_identifier_not_found") {
+            Alert.alert("Error", err.errors[0].message);
+          } else if (err.errors[0].code === "session_exists") {
+            Alert.alert("Error", err.errors[0].longMessage);
+          }
+        }
+      }
+    }
+
   };
 
   return (
@@ -97,7 +133,7 @@ const Page = () => {
         <View style={styles.inputContainer}>
           <Image source={countryCodeImage} style={styles.countryCodeImage} />
           <TextInput
-            style={[styles.input, { fontSize: 15, textAlign: "right" }]}
+            style={[styles.input, { fontSize: 18, textAlign: "right" }]}
             placeholder="Country code"
             placeholderTextColor={Colors.gray}
             value={countryCode}
@@ -108,7 +144,7 @@ const Page = () => {
               styles.input,
               {
                 flex: 1,
-                fontSize: 15,
+                fontSize: 18,
                 textAlign: "center",
                 height: 50,
                 paddingVertical: 0,
@@ -122,20 +158,10 @@ const Page = () => {
           />
         </View>
 
-        <View style={{ paddingTop: 10, flexDirection: 'row' }}>
-          <Text
-            style={{
-              textAlign: "center",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            You no get account ?{" "}
-          </Text>
+        <View style={styles.signupContainer}>
+          <Text>You no get account? </Text>
           <Link href={"/signup"}>
-            <TouchableOpacity>
-              <Text style={{ color: Colors.green }}>Sign Up</Text>
-            </TouchableOpacity>
+            <Text style={styles.signupText}>Sign Up</Text>
           </Link>
         </View>
 
@@ -147,7 +173,7 @@ const Page = () => {
             phoneNumber !== "" ? styles.enabled : styles.disabled,
             { marginBottom: 20, marginTop: 12 },
           ]}
-          onPress={onSignup}
+          onPress={() => onSignIn(SignInType.Phone)}
         >
           <Text style={defaultStyles.textButton}>Login</Text>
         </TouchableOpacity>
@@ -180,7 +206,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     position: "absolute",
-    left: 20,
+    left: 24,
     zIndex: 9999,
   },
   input: {
@@ -197,6 +223,15 @@ const styles = StyleSheet.create({
   },
   disabled: {
     backgroundColor: Colors.lightPurple,
+  },
+  signupContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-start",
+    paddingTop: 10,
+  },
+  signupText: {
+    color: Colors.green,
   },
 });
 
